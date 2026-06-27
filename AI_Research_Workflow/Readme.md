@@ -331,16 +331,13 @@ plot v(DIN) v(N1) v(WL)
 
 ---
 
-# NGSpice Result
+## NGSpice Result
 
 **Waveform**
 
-```text
-Path:
-AI_Research_Workflow/simulation_results/wordline_driver_output_waveform.png
-```
+`simulation_results/wordline_driver_output_waveform.png`
 
-*(Insert waveform image here.)*
+![Wordline Driver Output](simulation_results/wordline_driver_output_waveform.png)
 
 ### Observation
 
