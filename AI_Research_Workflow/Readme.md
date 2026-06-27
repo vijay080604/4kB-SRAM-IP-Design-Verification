@@ -130,7 +130,6 @@ Requirements:
 
 The first AI-generated SPICE netlist was created directly from the prompt without considering the exact SKY130 PDK implementation available in the local environment.
 
-> *(Paste the initial AI-*
 >
 > *-----------------------------------------------------------
 >
@@ -326,8 +325,6 @@ plot v(DIN) v(N1) v(WL)
 **** end user architecture code
 
 .end
-
-> *(Paste the final corrected Wordline Driver SPICE netlist here.)*
 
 ---
 
