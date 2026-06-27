@@ -1,0 +1,93 @@
+** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/sense_amplifier.sch
+**.subckt sense_amplifier
+
+************************************************
+* Cross-Coupled PMOS Latch
+************************************************
+
+XM1 OUT  OUTB Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+XM2 OUTB OUT  Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Cross-Coupled NMOS Latch
+************************************************
+
+XM3 OUT  OUTB NSTAR 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM4 OUTB OUT  NSTAR 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+************************************************
+* Sense Enable Tail Transistor
+************************************************
+
+XM5 NSTAR SA_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=1
+
+************************************************
+* Differential Input Coupling
+************************************************
+
+RBL  BL  OUT  5k
+RBLB BLB OUTB 5k
+
+************************************************
+* Bitline Inputs
+************************************************
+
+VBL BL 0 PULSE(
++1.80
++1.70
++5n
++100p
++100p
++10n
++20n)
+
+VBLB BLB 0 PULSE(
++1.70
++1.80
++5n
++100p
++100p
++10n
++20n)
+
+************************************************
+* Sense Enable
+************************************************
+
+VSA SA_EN 0 PULSE(
++0
++1.8
++7n
++100p
++100p
++8n
++20n)
+
+************************************************
+* Supply
+************************************************
+
+VVDD Vdd 0 1.8
+
+************************************************
+* Output Load
+************************************************
+
+COUT  OUT  0 20f
+COUTB OUTB 0 20f
+
+************************************************
+* SKY130 Library
+************************************************
+
+.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+
+tran 0.02n 35n
+
+plot v(BL)+8 v(BLB)+6 v(SA_EN)+4 v(OUT)+2 v(OUTB)
+
+.endc
+
+.end

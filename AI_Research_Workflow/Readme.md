@@ -722,66 +722,18 @@ Requirements:
 
 # Stage 1 — Complementary Data Generator
 
-### Netlist
+## SPICE Netlist
 
-> *(** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/write_driver_stage1.sch
-**.subckt write_driver_stage1
+<details>
+<summary>📄 View Stage 1 SPICE Netlist</summary>
 
-************************************************
-* CMOS Inverter
-************************************************
+[`spice_netlist/write_driver_stage1.spice`](spice_netlist/write_driver_stage1.spice)
 
-XM1 DINB DIN 0   0   sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+</details>
 
-XM2 DINB DIN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+---
 
-************************************************
-* Power Supply
-************************************************
-
-VVDD Vdd 0 1.8
-
-************************************************
-* Input Pulse
-************************************************
-
-VIN DIN 0 PULSE(
-+0
-+1.8
-+2n
-+100p
-+100p
-+5n
-+10n)
-
-************************************************
-* Output Load
-************************************************
-
-CLOAD DINB 0 20f
-
-************************************************
-* User Architecture
-************************************************
-
-.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
-
-.control
-
-tran 0.02n 20n
-
-plot v(DIN)+2 v(DINB)
-
-.endc
-
-************************************************
-
-.end)*
-> 
-
-### NGSpice Result
-
-`simulation_results/write_driver_stage1.png`
+## NGSpice Result
 
 <p align="center">
 <img src="simulation_results/write_driver_stage1.png" width="900">
@@ -791,108 +743,24 @@ plot v(DIN)+2 v(DINB)
 
 - DINB successfully generated.
 - Rail-to-rail logic levels achieved.
-- Stage 1 verified.
+- Stage 1 functionality verified.
 
 ---
 
 # Stage 2 — Complete Write Driver
 
-### Netlist
+## SPICE Netlist
 
-> *(** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/write_driver.sch
-**.subckt write_driver
+<details>
+<summary>📄 View Complete Write Driver SPICE Netlist</summary>
 
-************************************************
-* Stage 1 : CMOS Inverter
-************************************************
+[`spice_netlist/write_driver.spice`](spice_netlist/write_driver.spice)
 
-XM1 DINB DIN 0   0   sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
-XM2 DINB DIN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+</details>
 
-************************************************
-* Stage 2 : Write Driver
-************************************************
+---
 
-* BL Pull-down
-XM3 BL DINB NBL 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
-XM4 NBL WR_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
-
-* BLB Pull-down
-XM5 BLB DIN NBLB 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
-XM6 NBLB WR_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
-
-* Weak PMOS Pull-ups
-XM7 BL WR_EN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
-XM8 BLB WR_EN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
-
-************************************************
-* Supply
-************************************************
-
-VVDD Vdd 0 1.8
-
-************************************************
-* Input
-************************************************
-
-VIN DIN 0 PULSE(
-+0
-+1.8
-+2n
-+100p
-+100p
-+5n
-+10n)
-
-************************************************
-* Write Enable
-************************************************
-
-VWE WR_EN 0 PULSE(
-+0
-+1.8
-+5n
-+100p
-+100p
-+10n
-+20n)
-
-************************************************
-* Bitline Load
-************************************************
-
-CBL BL 0 100f
-CBLB BLB 0 100f
-
-************************************************
-* User Architecture
-************************************************
-
-.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
-
-.control
-
-tran 0.02n 30n
-
-plot v(DIN)+6 v(WR_EN)+4 v(BL)+2 v(BLB)
-
-.endc
-
-************************************************
-
-.end)*
-
-</p>
-
-### Observation
-
-- WR_EN successfully controlled the write operation.
-- BL and BLB generated complementary outputs.
-- Complete Write Driver verified.
-
-### NGSpice Result
-
-`simulation_results/write_driver.png`
+## NGSpice Result
 
 <p align="center">
 <img src="simulation_results/write_driver.png" width="900">
@@ -902,4 +770,87 @@ plot v(DIN)+6 v(WR_EN)+4 v(BL)+2 v(BLB)
 
 - WR_EN successfully controlled the write operation.
 - BL and BLB generated complementary outputs.
-- Complete Write Driver verified.
+- Complementary write operation verified.
+- Complete CMOS Write Driver successfully implemented.
+
+# Sense Amplifier
+
+## Objective
+
+Design and verify a latch-based SRAM Sense Amplifier using SKY130 devices. The implementation was developed incrementally by first validating the regenerative latch and then integrating the Sense Enable (SA_EN) signal.
+
+---
+
+## AI Prompt
+
+```text
+Design a latch-type SRAM Sense Amplifier using SKY130 devices.
+
+Requirements:
+
+- Use sky130_fd_pr__nfet_01v8 and sky130_fd_pr__pfet_01v8
+- VDD = 1.8 V
+- Differential inputs: BL and BLB
+- Differential outputs: OUT and OUTB
+- Include a Sense Enable (SA_EN) signal
+- Generate an NGSpice compatible SPICE netlist
+- Use the verified SKY130 library path
+- Include transient analysis
+- Plot BL, BLB, SA_EN, OUT and OUTB
+```
+
+---
+
+# Stage 1 – Regenerative Latch Verification
+
+## SPICE Netlist
+
+<details>
+<summary>📄 View Stage 1 SPICE Netlist</summary>
+
+[`spice_netlist/sense_amplifier_stage1.spice`](spice_netlist/sense_amplifier_stage1.spice)
+
+</details>
+
+---
+
+## NGSpice Result
+
+<p align="center">
+<img src="simulation_results/sense_amplifier_stage1.png" width="900">
+</p>
+
+### Observation
+
+- Cross-coupled regenerative latch verified.
+- BL and BLB differential successfully detected.
+- OUT and OUTB resolve to complementary logic levels.
+- Stage 1 latch functionality validated.
+
+---
+
+# Stage 2 – Sense Enable Integration
+
+## SPICE Netlist
+
+<details>
+<summary>📄 View Stage 2 SPICE Netlist</summary>
+
+[`spice_netlist/sense_amplifier.spice`](spice_netlist/sense_amplifier.spice)
+
+</details>
+
+---
+
+## NGSpice Result
+
+<p align="center">
+<img src="simulation_results/sense_amplifier.png" width="900">
+</p>
+
+### Observation
+
+- Sense operation is enabled through SA_EN.
+- Small BL/BLB differential is amplified into full logic levels.
+- Complementary outputs remain stable during the sensing window.
+- Functional latch-type SRAM Sense Amplifier successfully verified.

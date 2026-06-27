@@ -1,0 +1,53 @@
+** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/write_driver_stage1.sch
+**.subckt write_driver_stage1
+
+************************************************
+* CMOS Inverter
+************************************************
+
+XM1 DINB DIN 0   0   sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+XM2 DINB DIN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Power Supply
+************************************************
+
+VVDD Vdd 0 1.8
+
+************************************************
+* Input Pulse
+************************************************
+
+VIN DIN 0 PULSE(
++0
++1.8
++2n
++100p
++100p
++5n
++10n)
+
+************************************************
+* Output Load
+************************************************
+
+CLOAD DINB 0 20f
+
+************************************************
+* User Architecture
+************************************************
+
+.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+
+tran 0.02n 20n
+
+plot v(DIN)+2 v(DINB)
+
+.endc
+
+************************************************
+
+.end
