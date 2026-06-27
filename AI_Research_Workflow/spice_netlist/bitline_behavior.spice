@@ -1,0 +1,94 @@
+** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/bitline_behaviour.sch
+**.subckt bitline_behaviour
+
+************************************************
+* 6T SRAM CELL
+************************************************
+
+XM1 Q    Qbar   0    0    sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM2 Q    Qbar   Vdd  Vdd  sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+XM3 Qbar Q      0    0    sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM4 Qbar Q      Vdd  Vdd  sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* ACCESS TRANSISTORS
+************************************************
+
+XM5 BL   WL   Q     0    sky130_fd_pr__nfet_01v8 L=0.15 W=1
+XM6 BLB  WL   Qbar  0    sky130_fd_pr__nfet_01v8 L=0.15 W=1
+
+************************************************
+* PRECHARGE CIRCUIT
+************************************************
+
+XM7 BL   PRE  Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+XM8 BLB  PRE  Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* POWER SUPPLY
+************************************************
+
+VVDD Vdd 0 1.8
+
+************************************************
+* WORDLINE
+************************************************
+
+VWL WL 0 PULSE(
++0
++1.8
++5n
++100p
++100p
++10n
++20n)
+
+************************************************
+* PRECHARGE CONTROL
+* PRE = 0  -> Precharge ON
+* PRE = 1.8 -> Precharge OFF
+************************************************
+
+VPRE PRE 0 PULSE(
++0
++1.8
++4n
++100p
++100p
++20n
++40n)
+
+************************************************
+* BITLINE CAPACITANCE
+************************************************
+
+CBL  BL   0 100f
+CBLB BLB  0 100f
+
+************************************************
+* USER ARCHITECTURE
+************************************************
+
+.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+
+tran 0.02n 40n uic
+
+plot v(PRE)+6 v(WL)+4 v(BL)+2 v(BLB) v(Q) v(Qbar)
+
+.endc
+
+************************************************
+* INITIAL CONDITIONS
+************************************************
+
+.ic V(Q)=1.8
+.ic V(Qbar)=0
+.ic V(BL)=1.8
+.ic V(BLB)=1.8
+
+************************************************
+
+.end

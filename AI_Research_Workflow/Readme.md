@@ -355,3 +355,287 @@ This debugging process established a reusable workflow for future SRAM periphera
 * Compare with a working Xschem-generated reference when compatibility issues arise.
 * Update the netlist to match the local PDK syntax.
 * Re-simulate and verify the generated waveforms before documenting the implementation.
+# Bitline Behaviour
+
+## Objective
+
+Design and simulate the bitline behaviour of a 6T SRAM cell during a read operation and observe the voltage difference developed on BL and BLB.
+
+---
+
+# Initial AI Prompt
+
+```text
+Design a transistor-level SPICE circuit to demonstrate SRAM Bitline Behaviour during a read operation using SKY130 devices.
+
+Requirements:
+
+- Use a single 6T SRAM cell.
+- Include BL and BLB capacitive loads.
+- Drive the Wordline using a pulse source.
+- Precharge both bitlines to VDD.
+- Use SKY130 1.8 V MOSFET devices.
+- Generate an NGSpice-compatible SPICE netlist.
+- Include transient analysis.
+- Plot WL, BL, BLB, Q and Qbar.
+- Use the verified SKY130 library path.
+```
+
+---
+
+# Initial AI Generated Netlist
+
+> *(Past*
+>
+> ** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/bitline_behaviour.sch
+> **.subckt bitline_behaviour
+>
+> ---
+>
+> * 6T SRAM Cell
+>
+> ---
+>
+> XM1 Q    Qbar   0    0    sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+> XM2 Q    Qbar   Vdd  Vdd  sky130_fd_pr__pfet_01v8 L=0.15 W=1
+>
+> XM3 Qbar Q      0    0    sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+> XM4 Qbar Q      Vdd  Vdd  sky130_fd_pr__pfet_01v8 L=0.15 W=1
+>
+> ---
+>
+> * Access Transistors
+>
+> ---
+>
+> XM5 BL   WL     Q     0    sky130_fd_pr__nfet_01v8 L=0.15 W=1
+> XM6 BLB  WL     Qbar  0    sky130_fd_pr__nfet_01v8 L=0.15 W=1
+>
+> ---
+>
+> * Wordline Pulse
+>
+> ---
+>
+> VWL WL 0 PULSE(0 1.8 5n 100p 100p 10n 20n)
+>
+> ---
+>
+> * Supply
+>
+> ---
+>
+> VVDD Vdd 0 1.8
+>
+> ---
+>
+> * Bitline Capacitances
+>
+> ---
+>
+> CBL  BL  0 1p
+> CBLB BLB 0 1p
+>
+> **** begin user architecture code
+>
+> .lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+>
+> .control
+>
+> tran 0.05n 40n uic
+>
+> plot v(WL)+4 v(BL)+2 v(BLB) v(Q) v(Qbar)
+>
+> .endc
+>
+> ---
+>
+> * Initial Conditions
+>
+> ---
+>
+> .ic V(Q)=1.8
+> .ic V(Qbar)=0
+> .ic V(BL)=1.8
+> .ic V(BLB)=1.8
+>
+> **** end user architecture code
+>
+> .end
+
+---
+
+# Initial Observation
+
+* Simulation completed successfully.
+* Excessive discharge was observed on both bitlines.
+* Expected differential bitline behaviour was not achieved.
+
+---
+
+# Debugging Workflow
+
+### Root Cause
+
+The bitlines were floating after initialization because no precharge circuitry was present.
+
+### Improvements
+
+* Added PMOS precharge transistors.
+* Added PRE control signal.
+* Reduced bitline capacitance.
+* Updated transient waveform to include PRE.
+
+---
+
+# Updated Netlist
+
+> *(*
+>
+> ** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/bitline_behaviour.sch
+> **.subckt bitline_behaviour
+>
+> ---
+>
+> * 6T SRAM CELL
+>
+> ---
+>
+> XM1 Q    Qbar   0    0    sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+> XM2 Q    Qbar   Vdd  Vdd  sky130_fd_pr__pfet_01v8 L=0.15 W=1
+>
+> XM3 Qbar Q      0    0    sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+> XM4 Qbar Q      Vdd  Vdd  sky130_fd_pr__pfet_01v8 L=0.15 W=1
+>
+> ---
+>
+> * ACCESS TRANSISTORS
+>
+> ---
+>
+> XM5 BL   WL   Q     0    sky130_fd_pr__nfet_01v8 L=0.15 W=1
+> XM6 BLB  WL   Qbar  0    sky130_fd_pr__nfet_01v8 L=0.15 W=1
+>
+> ---
+>
+> * PRECHARGE CIRCUIT
+>
+> ---
+>
+> XM7 BL   PRE  Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+> XM8 BLB  PRE  Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+>
+> ---
+>
+> * POWER SUPPLY
+>
+> ---
+>
+> VVDD Vdd 0 1.8
+>
+> ---
+>
+> * WORDLINE
+>
+> ---
+>
+> VWL WL 0 PULSE(
+> +0
+> +1.8
+> +5n
+> +100p
+> +100p
+> +10n
+> +20n)
+>
+> ---
+>
+> * PRECHARGE CONTROL
+> * PRE = 0  -> Precharge ON
+> * PRE = 1.8 -> Precharge OFF
+>
+> ---
+>
+> VPRE PRE 0 PULSE(
+> +0
+> +1.8
+> +4n
+> +100p
+> +100p
+> +20n
+> +40n)
+>
+> ---
+>
+> * BITLINE CAPACITANCE
+>
+> ---
+>
+> CBL  BL   0 100f
+> CBLB BLB  0 100f
+>
+> ---
+>
+> * USER ARCHITECTURE
+>
+> ---
+>
+> .lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+>
+> .control
+>
+> tran 0.02n 40n uic
+>
+> plot v(PRE)+6 v(WL)+4 v(BL)+2 v(BLB) v(Q) v(Qbar)
+>
+> .endc
+>
+> ---
+>
+> * INITIAL CONDITIONS
+>
+> ---
+>
+> .ic V(Q)=1.8
+> .ic V(Qbar)=0
+> .ic V(BL)=1.8
+> .ic V(BLB)=1.8
+>
+> ---
+>
+> .end
+
+---
+
+# NGSpice Result
+
+## Initial Simulation Output
+
+`simulation_results/bitline_behaviour_initial_simulation_output.png`
+
+<p align="center">
+<img src="simulation_results/bitline_behaviour_initial_simulation_output.png" width="900">
+</p>
+
+### Observation
+
+* SRAM cell operated correctly.
+* BL and BLB discharged excessively.
+* Differential voltage was not clearly visible.
+
+---
+
+## Updated Simulation Output
+
+`simulation_results/bitline_behaviour.png`
+
+<p align="center">
+<img src="simulation_results/bitline_behaviour.png" width="900">
+</p>
+
+### Observation
+
+* Bitlines were successfully precharged before the read operation.
+* Wordline activated after precharge release.
+* Differential bitline behaviour was observed.
+* SRAM cell retained the stored data throughout the simulation.
