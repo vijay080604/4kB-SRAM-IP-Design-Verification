@@ -1,0 +1,82 @@
+** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/write_driver.sch
+**.subckt write_driver
+
+************************************************
+* Stage 1 : CMOS Inverter
+************************************************
+
+XM1 DINB DIN 0   0   sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM2 DINB DIN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Stage 2 : Write Driver
+************************************************
+
+* BL Pull-down
+XM3 BL DINB NBL 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM4 NBL WR_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+* BLB Pull-down
+XM5 BLB DIN NBLB 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM6 NBLB WR_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+* Weak PMOS Pull-ups
+XM7 BL WR_EN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+XM8 BLB WR_EN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Supply
+************************************************
+
+VVDD Vdd 0 1.8
+
+************************************************
+* Input
+************************************************
+
+VIN DIN 0 PULSE(
++0
++1.8
++2n
++100p
++100p
++5n
++10n)
+
+************************************************
+* Write Enable
+************************************************
+
+VWE WR_EN 0 PULSE(
++0
++1.8
++5n
++100p
++100p
++10n
++20n)
+
+************************************************
+* Bitline Load
+************************************************
+
+CBL BL 0 100f
+CBLB BLB 0 100f
+
+************************************************
+* User Architecture
+************************************************
+
+.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+
+tran 0.02n 30n
+
+plot v(DIN)+6 v(WR_EN)+4 v(BL)+2 v(BLB)
+
+.endc
+
+************************************************
+
+.end

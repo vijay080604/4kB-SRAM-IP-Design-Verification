@@ -639,3 +639,267 @@ The bitlines were floating after initialization because no precharge circuitry w
 * Wordline activated after precharge release.
 * Differential bitline behaviour was observed.
 * SRAM cell retained the stored data throughout the simulation.
+* # Write Driver
+
+## Objective
+
+Design and verify a CMOS SRAM Write Driver using an incremental implementation approach.
+
+---
+
+# AI Prompt
+
+```text
+Design a transistor-level CMOS SRAM Write Driver using SKY130 devices.
+
+Requirements:
+
+- Use sky130_fd_pr__nfet_01v8 and sky130_fd_pr__pfet_01v8
+- VDD = 1.8 V
+- Generate complementary outputs BL and BLB.
+- Include Write Enable (WR_EN).
+- Generate an NGSpice compatible SPICE netlist.
+- Use the verified SKY130 library path.
+- Include transient analysis.
+- Plot DIN, WR_EN, BL and BLB.
+```
+
+---
+
+# Stage 1 — Complementary Data Generator
+
+### Netlist
+
+> *(Paste the Stage 1 SPICE netlist here.)*
+
+### NGSpice Result
+
+`simulation_results/write_driver_stage1.png`
+
+<p align="center">
+<img src="simulation_results/write_driver_stage1.png" width="900">
+</p>
+
+### Observation
+
+- DINB successfully generated.
+- Rail-to-rail logic levels achieved.
+- Stage 1 verified.
+
+---
+
+# Stage 2 — Complete Write Driver
+
+### Netlist
+
+> *(Paste the complete Write Driver SPICE netlist here.)*
+> # Write Driver
+
+## Objective
+
+Design and verify a CMOS SRAM Write Driver using an incremental implementation approach.
+
+---
+
+# AI Prompt
+
+```text
+Design a transistor-level CMOS SRAM Write Driver using SKY130 devices.
+
+Requirements:
+
+- Use sky130_fd_pr__nfet_01v8 and sky130_fd_pr__pfet_01v8
+- VDD = 1.8 V
+- Generate complementary outputs BL and BLB.
+- Include Write Enable (WR_EN).
+- Generate an NGSpice compatible SPICE netlist.
+- Use the verified SKY130 library path.
+- Include transient analysis.
+- Plot DIN, WR_EN, BL and BLB.
+```
+
+---
+
+# Stage 1 — Complementary Data Generator
+
+### Netlist
+
+> *(** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/write_driver_stage1.sch
+**.subckt write_driver_stage1
+
+************************************************
+* CMOS Inverter
+************************************************
+
+XM1 DINB DIN 0   0   sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+XM2 DINB DIN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Power Supply
+************************************************
+
+VVDD Vdd 0 1.8
+
+************************************************
+* Input Pulse
+************************************************
+
+VIN DIN 0 PULSE(
++0
++1.8
++2n
++100p
++100p
++5n
++10n)
+
+************************************************
+* Output Load
+************************************************
+
+CLOAD DINB 0 20f
+
+************************************************
+* User Architecture
+************************************************
+
+.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+
+tran 0.02n 20n
+
+plot v(DIN)+2 v(DINB)
+
+.endc
+
+************************************************
+
+.end)*
+> 
+
+### NGSpice Result
+
+`simulation_results/write_driver_stage1.png`
+
+<p align="center">
+<img src="simulation_results/write_driver_stage1.png" width="900">
+</p>
+
+### Observation
+
+- DINB successfully generated.
+- Rail-to-rail logic levels achieved.
+- Stage 1 verified.
+
+---
+
+# Stage 2 — Complete Write Driver
+
+### Netlist
+
+> *(** sch_path: /home/vijaykumar/internship/SRAM_SKY130/task2/schematics/write_driver.sch
+**.subckt write_driver
+
+************************************************
+* Stage 1 : CMOS Inverter
+************************************************
+
+XM1 DINB DIN 0   0   sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM2 DINB DIN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Stage 2 : Write Driver
+************************************************
+
+* BL Pull-down
+XM3 BL DINB NBL 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM4 NBL WR_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+* BLB Pull-down
+XM5 BLB DIN NBLB 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+XM6 NBLB WR_EN 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42
+
+* Weak PMOS Pull-ups
+XM7 BL WR_EN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+XM8 BLB WR_EN Vdd Vdd sky130_fd_pr__pfet_01v8 L=0.15 W=1
+
+************************************************
+* Supply
+************************************************
+
+VVDD Vdd 0 1.8
+
+************************************************
+* Input
+************************************************
+
+VIN DIN 0 PULSE(
++0
++1.8
++2n
++100p
++100p
++5n
++10n)
+
+************************************************
+* Write Enable
+************************************************
+
+VWE WR_EN 0 PULSE(
++0
++1.8
++5n
++100p
++100p
++10n
++20n)
+
+************************************************
+* Bitline Load
+************************************************
+
+CBL BL 0 100f
+CBLB BLB 0 100f
+
+************************************************
+* User Architecture
+************************************************
+
+.lib /home/vijaykumar/pdk/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.control
+
+tran 0.02n 30n
+
+plot v(DIN)+6 v(WR_EN)+4 v(BL)+2 v(BLB)
+
+.endc
+
+************************************************
+
+.end)*
+
+</p>
+
+### Observation
+
+- WR_EN successfully controlled the write operation.
+- BL and BLB generated complementary outputs.
+- Complete Write Driver verified.
+
+### NGSpice Result
+
+`simulation_results/write_driver.png`
+
+<p align="center">
+<img src="simulation_results/write_driver.png" width="900">
+</p>
+
+### Observation
+
+- WR_EN successfully controlled the write operation.
+- BL and BLB generated complementary outputs.
+- Complete Write Driver verified.
