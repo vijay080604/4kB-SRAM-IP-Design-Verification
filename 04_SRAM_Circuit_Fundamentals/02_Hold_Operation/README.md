@@ -48,6 +48,15 @@ These states remain stable as long as power is supplied.
 * The cell behaves as a bistable latch.
 * Small voltage disturbances are corrected through regenerative feedback.
 * The access transistors provide electrical isolation from the bitlines.
+### Hold_operation_simulation_output
+
+<p align="center">
+<img src="./simulation_results/hold_mode_operation_success.png" width="900">
+</p>
+
+<p align="center">
+<img src="./simulation_results/hold_operation_simulation.png" width="900">
+</p>
 
 ---
 

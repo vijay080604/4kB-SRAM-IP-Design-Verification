@@ -18,6 +18,14 @@ During the write operation:
 * Wordline (WL) was enabled.
 * Differential voltages were applied to BL and BLbar.
 * Storage node voltages were monitored to determine whether the cell flipped successfully.
+### SPICE Netlist
+
+<details>
+<summary>📄 View SPICE Netlist</summary>
+
+[Open write_margin_spice_netlist .spice](./write_margin_spice_netlist.spice)
+
+</details>
 
 ---
 
@@ -29,6 +37,12 @@ During the write operation:
 | 0.2    | 1.6       | Successful write |
 | 0.4    | 1.4       | Successful write |
 | 0.6    | 1.2       | Write failed     |
+
+### CMOS Inverter Schematic
+
+<p align="center">
+<img src="./write_margin_schematic.png" width="900">
+</p>
 
 ---
 
@@ -58,12 +72,22 @@ This indicates sufficient write strength.
 The SRAM cell continued to switch states successfully.
 
 This represents the weakest differential voltage that still produced a successful write in the current sizing configuration.
+## Simulation Result
+
+<p align="center">
+<img src="./write_margin_success.png" width="900">
+</p>
 
 ---
 
 ### Case 4: BL = 0.6 V, BLbar = 1.2 V
 
 The internal storage nodes were disturbed but failed to change states completely.
+# failed_write_margin Simulation Result
+
+<p align="center">
+<img src="./write_margin_failure.png" width="900">
+</p>
 
 Observed behavior:
 
@@ -72,6 +96,7 @@ Observed behavior:
 * Once WL was disabled, the cross-coupled inverters restored the original state.
 
 This demonstrates the inherent regenerative feedback of the 6T SRAM cell.
+
 
 ---
 

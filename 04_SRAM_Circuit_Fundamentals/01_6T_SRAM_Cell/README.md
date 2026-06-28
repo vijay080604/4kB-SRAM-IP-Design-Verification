@@ -31,6 +31,19 @@ Stable states:
 
 The access transistors connect the storage nodes to the bitlines during read and write operations and isolate them during hold mode.
 
+### SPICE Netlist
+
+<details>
+<summary>📄 View SPICE Netlist</summary>
+
+[Open 6T_SRAM.spice](./6T-sram.spice)
+
+</details>
+### 6T_SRAM Schematic
+
+<p align="center">
+<img src="./sram_6t_cell.png" width="900">
+</p>
 ---
 
 ## Design Insights

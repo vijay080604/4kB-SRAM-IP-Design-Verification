@@ -38,7 +38,19 @@ The write driver applies:
 
 * BL = 0
 * BLB = 1
+### SPICE Netlist
 
+<details>
+<summary>📄 View SPICE Netlist</summary>
+
+[write_operation_netlist.spice](./write_operation.spice)
+
+</details>
+#Write_operation Schematic
+
+<p align="center">
+<img src="./write_operation_schematic.png" width="900">
+</p>
 ---
 
 ## Design Insights
@@ -54,6 +66,11 @@ The write driver applies:
 * The write driver must overcome the existing stored state.
 * Stronger access transistors generally improve write ability.
 * Cell stability and write ability must be balanced carefully.
+* ## Simulation Result
+
+<p align="center">
+<img src="./write_operation.png" width="900">
+</p>
 
 ---
 

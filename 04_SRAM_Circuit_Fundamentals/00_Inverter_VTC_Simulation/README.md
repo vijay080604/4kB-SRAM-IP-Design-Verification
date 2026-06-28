@@ -20,8 +20,19 @@ Study the operation of a CMOS inverter and understand how complementary PMOS and
 * PMOS conducts when the input is LOW.
 * NMOS conducts when the input is HIGH.
 * The output switches between VDD and GND based on the input state.
+ ### SPICE Netlist
 
----
+<details>
+<summary>📄 View SPICE Netlist</summary>
+
+[Open inverter.spice](./inverter.spice)
+
+</details>
+ CMOS Inverter Schematic
+
+<p align="center">
+<img src="./cmos_inverter_schematic.png" width="900">
+</p>
 
 ## Design Insights
 
@@ -36,7 +47,12 @@ Study the operation of a CMOS inverter and understand how complementary PMOS and
 * Input LOW → Output HIGH.
 * Input HIGH → Output LOW.
 * Verified correct inverter operation through simulation.
+* 
+# CMOS Inverter VTC Simulation Result
 
+<p align="center">
+<img src="./cmos_inveter_vtc_spice_output.png" width="900">
+</p>
 ---
 
 ## AI-Assisted Workflow

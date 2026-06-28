@@ -64,8 +64,11 @@ L = 0.15 μm
 - Qbar experienced a small disturbance (~0.5 V).
 - The cell restored itself after the wordline was disabled.
 
-## Result
+### Simulation Result
 
+<p align="center">
+<img src="./read_margin_case1.png" width="900">
+</p>
 ✔ Stable
 
 
@@ -88,8 +91,11 @@ L = 0.15 μm
 - Q remained almost unchanged.
 - Cell recovered after the read operation.
 
-## Result
+### Simulation Result
 
+<p align="center">
+<img src="./read_margin_case2.png" width="900">
+</p>
 ✔ Stable
 
 ---
@@ -109,8 +115,11 @@ L = 0.15 μm
 - Read operation remained successful.
 - No read upset occurred.
 
-## Result
+### Simulation Result
 
+<p align="center">
+<img src="./read_margin_case3.png" width="900">
+</p>
 ✔ Stable
 
 ---
@@ -130,8 +139,11 @@ L = 0.15 μm
 - Q experienced noticeable degradation.
 - Cell successfully restored its state.
 
-## Result
+### Simulation Result
 
+<p align="center">
+<img src="./read_margin_case4.png" width="900">
+</p>
 ✔ Stable
 
 
@@ -156,7 +168,11 @@ L = 0.15 μm
 This demonstrates that excessively strong access transistors can significantly degrade read stability.
 
 ## Result
+### Simulation Result
 
+<p align="center">
+<img src="./read_margin_case5.png" width="900">
+</p>
 ⚠ Near Read Failure
 
 

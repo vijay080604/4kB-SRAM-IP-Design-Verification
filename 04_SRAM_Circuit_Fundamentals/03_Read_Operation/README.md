@@ -36,6 +36,20 @@ For:
 
 BLB begins discharging while BL remains near VDD.
 
+### SPICE Netlist
+
+<details>
+<summary>📄 View SPICE Netlist</summary>
+
+[Open read_operation.spice](./read_operation_netlist.spice)
+
+</details>
+
+### Read_operation  Schematic
+
+<p align="center">
+<img src="./read_operation_schematic.png" width="900">
+</p>
 ---
 
 ## Design Insights
@@ -51,6 +65,13 @@ BLB begins discharging while BL remains near VDD.
 * The memory cell does not directly drive a bitline to ground.
 * Only a small differential voltage is required for successful sensing.
 * Read operation temporarily connects internal storage nodes to the bitlines.
+*
+### Read_operation  result
+
+<p align="center">
+<img src="./read_operation.png" width="900">
+</p>
+---
 
 ---
 

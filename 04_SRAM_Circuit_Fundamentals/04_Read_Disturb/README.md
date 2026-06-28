@@ -29,7 +29,19 @@ This creates a tug-of-war between:
 * Access NMOS
 
 If the access transistor is too strong, the storage node voltage may rise excessively and potentially cause a read upset.
+### SPICE Netlist
 
+<details>
+<summary>📄 View SPICE Netlist</summary>
+
+[Open read_disturb.spice](./read_disturb_netlist.spice)
+
+</details>
+# Read_disturb_Schematic
+
+<p align="center">
+<img src="./read_disturb_schematic.png" width="900">
+</p>
 ---
 
 ## Design Insights
@@ -45,7 +57,12 @@ If the access transistor is too strong, the storage node voltage may rise excess
 * Reading a cell is not a completely non-invasive operation.
 * Excessive node voltage rise can lead to data corruption.
 * Proper sizing ensures safe read functionality.
+* 
+###  Simulation Result
 
+<p align="center">
+<img src="./read_disturb.png" width="900">
+</p>
 ---
 
 ## AI-Assisted Workflow
