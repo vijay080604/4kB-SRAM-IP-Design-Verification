@@ -557,3 +557,142 @@ Requirements:
 - Small BL/BLB differential is amplified into full logic levels.
 - Complementary outputs remain stable during the sensing window.
 - Functional latch-type SRAM Sense Amplifier successfully verified.
+- # Row Decoder
+
+## Objective
+
+Design and verify the building blocks of a CMOS 2-to-4 SRAM Row Decoder using SKY130 devices through an incremental, transistor-level implementation approach.
+
+---
+
+# AI Prompt
+
+```text
+Design a transistor-level CMOS 2-to-4 SRAM Row Decoder using SKY130 devices.
+
+Requirements:
+
+- Use sky130_fd_pr__nfet_01v8 and sky130_fd_pr__pfet_01v8
+- VDD = 1.8 V
+- Generate complementary address signals.
+- Implement CMOS NAND and AND logic.
+- Decode two address inputs into four wordlines.
+- Use the verified SKY130 library path.
+- Generate an NGSpice-compatible SPICE netlist.
+- Include transient analysis.
+```
+
+---
+
+# Stage 1 — Address Inverters
+
+### SPICE Netlist
+
+<details>
+<summary>📄 View Stage 1 Netlist</summary>
+
+`spice_netlist/row_decoder_stage1.spice`
+
+</details>
+
+### NGSpice Result
+
+`simulation_results/row_decoder_stage1.png`
+
+<p align="center">
+<img src="simulation_results/row_decoder_stage1.png" width="900">
+</p>
+
+### Observation
+
+- Complementary address signals generated.
+- Rail-to-rail logic verified.
+- Stage 1 successfully validated.
+
+---
+
+# Stage 2 — CMOS NAND Gate
+
+### SPICE Netlist
+
+<details>
+<summary>📄 View Stage 2 Netlist</summary>
+
+`spice_netlist/row_decoder_stage2.spice`
+
+</details>
+
+### NGSpice Result
+
+`simulation_results/row_decoder_stage2.png`
+
+<p align="center">
+<img src="simulation_results/row_decoder_stage2.png" width="900">
+</p>
+
+### Observation
+
+- CMOS NAND operation verified.
+- Correct pull-up and pull-down paths observed.
+- Output matches NAND logic.
+
+---
+
+# Stage 3 — CMOS AND Gate
+
+### SPICE Netlist
+
+<details>
+<summary>📄 View Stage 3 Netlist</summary>
+
+`spice_netlist/row_decoder_stage3.spice`
+
+</details>
+
+### NGSpice Result
+
+`simulation_results/row_decoder_stage3.png`
+
+<p align="center">
+<img src="simulation_results/row_decoder_stage3.png" width="900">
+</p>
+
+### Observation
+
+- AND function implemented using CMOS NAND + Inverter.
+- Full rail-to-rail output achieved.
+- Stage 3 successfully validated.
+
+---
+
+# Research & Debugging
+
+## Problem Encountered
+
+The complete decoder was initially implemented using behavioral voltage sources with `if()` expressions.
+
+```spice
+BWL0 WL0 0 V=if(...)
+```
+
+NGSpice returned:
+
+```text
+Error: no such function 'if'
+Simulation interrupted due to error.
+```
+
+### Root Cause
+
+- `if()` expressions are not supported in this NGSpice implementation.
+- The generated approach relied on behavioral modeling instead of transistor-level CMOS logic.
+
+### Resolution
+
+Instead of behavioral logic, the decoder was redesigned hierarchically by verifying each CMOS building block independently:
+
+- Stage 1 — Address Inverters
+- Stage 2 — CMOS NAND Gate
+- Stage 3 — CMOS AND Gate
+
+These verified subcircuits can be hierarchically instantiated to construct the complete 2-to-4 CMOS Row Decoder.
