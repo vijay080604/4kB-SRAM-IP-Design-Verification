@@ -779,3 +779,87 @@ Generate the inverter VTC and develop a reusable NGSpice-to-Python workflow for 
 * Python package compatibility (NumPy, Pandas, Matplotlib).
 * CSV parsing and preprocessing.
 * Butterfly curve generation using mirrored VTC data.
+* # SRAM Timing Sequence
+
+## Objective
+
+Design and verify the control timing sequence required for SRAM read and write operations by generating the essential control signals in the correct order.
+
+---
+
+## Key Signals
+
+- **CLK** – System clock
+- **PRE** – Precharge enable
+- **WL** – Wordline enable
+- **SA_EN** – Sense amplifier enable
+- **WE** – Write enable
+
+---
+
+## Timing Sequence
+
+1. Precharge the bitlines.
+2. Enable the selected wordline.
+3. Perform Read or Write operation.
+4. Enable the Sense Amplifier for read.
+5. Disable all control signals and prepare for the next cycle.
+
+---
+
+## SPICE Implementation
+
+### SPICE Netlist
+
+<details>
+<summary>📄 View Timing Stage Netlist</summary>
+
+[Open timing_stage1.spice](./spice_netlist/timing_stage1.spice)
+
+</details>
+
+---
+
+## Simulation Result
+
+<p align="center">
+<img src="./simulation_results/timing_stage1.png" width="900">
+</p>
+
+---
+
+## Observations
+
+- Generated all SRAM control signals successfully.
+- Verified the correct activation sequence of **PRE → WL → SA_EN → WE**.
+- Established the timing framework for complete SRAM integration.
+
+---
+
+## AI-Assisted Workflow
+
+**Prompt Used:**
+
+> *Design and verify the timing sequence for an SRAM read/write operation using NGSpice by generating CLK, PRE, WL, SA_EN and WE signals.*
+
+**AI Model:**  
+ChatGPT (GPT-5.5)
+
+---
+
+## Next Steps
+
+Integrate the timing controller with the SRAM cell and peripheral circuits to verify complete SRAM read and write operations.
+
+---
+
+# Research Summary
+
+| Aspect | Approach |
+|--------|----------|
+| Research Method | AI-assisted iterative design and verification |
+| Development Flow | Learn → Design → Simulate → Debug → Verify → Document |
+| Verification | NGSpice transient/DC simulation with waveform validation |
+| Optimization | Modular SPICE netlists, reusable subcircuits, standardized node naming |
+| AI Usage | Concept learning, circuit design, debugging, documentation |
+| Outcome | Successfully verified the implementation and documented the design workflow for future SRAM integration. |
