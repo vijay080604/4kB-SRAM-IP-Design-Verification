@@ -591,7 +591,7 @@ Requirements:
 <details>
 <summary>📄 View Stage 1 Netlist</summary>
 
-`spice_netlist/row_decoder_stage1.spice`
+[Row Decoder Stage 1 Netlist](spice_netlist/row_decoder_stage1.spice)
 
 </details>
 
@@ -618,7 +618,8 @@ Requirements:
 <details>
 <summary>📄 View Stage 2 Netlist</summary>
 
-`spice_netlist/row_decoder_stage2.spice`
+
+[Row Decoder Stage 2 Netlist](spice_netlist/row_decoder_stage2.spice)
 
 </details>
 
@@ -645,7 +646,7 @@ Requirements:
 <details>
 <summary>📄 View Stage 3 Netlist</summary>
 
-`spice_netlist/row_decoder_stage3.spice`
+[Row Decoder Stage 3 Netlist](spice_netlist/row_decoder_stage3.spice)
 
 </details>
 
@@ -696,3 +697,85 @@ Instead of behavioral logic, the decoder was redesigned hierarchically by verify
 - Stage 3 — CMOS AND Gate
 
 These verified subcircuits can be hierarchically instantiated to construct the complete 2-to-4 CMOS Row Decoder.
+# Hold Static Noise Margin (Hold SNM)
+
+## Objective
+
+Analyze the Hold Static Noise Margin (Hold SNM) of a 6T SRAM cell by generating the inverter VTC and establishing a Python-based butterfly curve generation workflow.
+
+---
+
+# Initial AI Prompt
+
+```text
+Design a transistor-level Hold SNM analysis for a 6T SRAM cell using SKY130 technology.
+
+Requirements:
+
+- Operate the SRAM cell in Hold mode.
+- Disable the Wordline.
+- Perform a DC sweep.
+- Generate the inverter VTC.
+- Export simulation data.
+- Generate the Butterfly Curve using Python.
+- Maintain NGSpice compatibility.
+```
+
+---
+
+# Research Goal
+
+Generate the inverter VTC and develop a reusable NGSpice-to-Python workflow for Hold SNM analysis.
+
+---
+
+### SPICE Netlist
+
+<details>
+<summary>📄 View Hold SNM Netlist</summary>
+
+[snm_hold.spice](spice_netlist/snm_hold.spice)
+
+</details>
+
+---
+
+# Hold SNM Schematic
+
+[snm_butterfly_schematic.png](simulation_results/snm_butterrfly_schematic.png)
+
+<p align="center">
+<img src="./simulation_results/snm_butterrfly_schematic.png" width="900">
+</p>
+
+### Observation
+
+* Configured the 6T SRAM cell in Hold mode.
+* Performed DC sweep for inverter VTC generation.
+* Exported simulation data for post-processing.
+
+---
+
+# Hold SNM Butterfly Curve
+
+`simulation_results/hold_snm_butterfly_curve.png`
+
+<p align="center">
+<img src="simulation_results/hold_snm_butterfly_curve.png" width="900">
+</p>
+
+### Observation
+
+* Imported the NGSpice CSV data into Python.
+* Generated the mirrored inverter characteristic.
+* Successfully produced the Hold SNM butterfly curve.
+* Established a reusable workflow for future Read and Write SNM analysis.
+
+---
+
+# Research Challenges
+
+* NGSpice CSV export formatting.
+* Python package compatibility (NumPy, Pandas, Matplotlib).
+* CSV parsing and preprocessing.
+* Butterfly curve generation using mirrored VTC data.
