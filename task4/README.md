@@ -9,8 +9,12 @@
 | 4 | Technology Module Loading Failure | Investigate why OpenRAM failed to load the SKY130 technology module and identify missing dependencies. | Guided a systematic investigation using directory inspection (`tree`), file search (`find`), and comparison with the latest OpenRAM technology package. Helped identify outdated and missing technology components. | ✅ Fixed |
 | 5 | API Migration for SKY130 Technology | Explain why `design_rules` and related modules were no longer recognized after upgrading OpenRAM. | Determined that the SKY130 technology package was written for an older OpenRAM API. Assisted in migrating imports and updating references to the newer `openram.drc` interface. | ✅ Fixed |
 | 6 | Missing Python Dependency | Analyze the `ModuleNotFoundError: No module named 'sklearn'` encountered during characterization. | Identified Scikit-Learn as a required dependency for the characterization engine and recommended installing it using `pip3 install scikit-learn`. | ✅ Fixed |
-| 7 | Engineering Debug Documentation | Convert the entire debugging process into a professional engineering log suitable for GitHub documentation. | Generated a structured troubleshooting log including issue description, root cause, investigation commands, command purpose, implemented fix, supporting screenshots, and debugging summary table. | ✅ Adopted |
-| 8 | README Refinement | Improve the repository documentation by making it concise, engineering-focused, and reproducible for future users. | Refined the README structure with task overview, workflow, debugging log, AI Prompt Log, execution steps, generated outputs, and project status while avoiding unnecessary explanations. | ✅ Adopted |
+| 7 | OpenRAM–SKY130 Compatibility Investigation | Investigate the `AttributeError: 'pbitcell' object has no attribute 'poly_to_active'` and determine whether it originates from the compiler or the SKY130 technology package. | Performed systematic root-cause analysis by tracing the constructor hierarchy, inspecting DRC initialization, comparing technology rules with compiler expectations, generating debugging reports, and identifying a compatibility mismatch between `poly_to_active` and `poly_to_contact`. | ✅ Root cause identified |
+| 8 | Compatibility Patch Implementation | Design a backward-compatible solution to resolve the `poly_to_active` / `poly_to_contact` mismatch without affecting existing OpenRAM functionality. | Recommended implementing a compatibility layer inside `hierarchy_layout.py` to generate both layout attributes from the same SKY130 DRC rule. Guided verification using temporary debug statements to confirm correct initialization. | ✅ Fixed |
+| 9 | Verification of Compatibility Fix | Verify that the implemented compatibility patch successfully resolved the layout generation failure. | Suggested adding runtime debug statements to inspect generated DRC attributes and validate the fix before removing the temporary debugging code. Confirmed successful initialization of both `poly_to_active` and `poly_to_contact`, allowing OpenRAM to progress further. | ✅ Verified |
+| 10 | SRAM Configuration Restriction Analysis | Investigate why OpenRAM rejects the 2-word × 16-bit SRAM configuration with the error `Minimum number of rows is 16`. | Located the restriction inside `compiler/sram_config.py`, explained the internal row constraint implemented by OpenRAM, and concluded that the remaining issue is an architectural limitation rather than a technology compatibility problem. | ⏳ Under Investigation |
+| 11 | Engineering Debug Documentation | Convert the complete debugging process into a professional engineering log suitable for GitHub documentation. | Generated a structured debugging report documenting each issue with its root cause, investigation commands, command purpose, observations, implemented fix, verification, and supporting screenshots while maintaining engineering traceability. | ✅ Adopted |
+| 12 | README Refinement | Improve the repository documentation by making it concise, engineering-focused, and reproducible for future users. | Refined the README structure with task overview, implementation workflow, debugging log, AI Prompt Log, execution steps, generated outputs, engineering observations, and current project status. | ✅ Adopted |
 ## Objective
 
 Validate an OpenRAM-generated **2-word × 16-bit single-port SKY130 SRAM** through functional verification, physical verification, post-layout characterization, and stability analysis using AI-assisted workflows.
@@ -352,13 +356,308 @@ Generated files include:
 
 ---
 
-# Current Status
+---
 
-The OpenRAM compiler initializes successfully and generates all output files. The remaining issue related to `poly_to_contact` compatibility is currently under investigation and will be documented in the next update.
+# Issue 6: OpenRAM–SKY130 Layout Compatibility (`poly_to_active` / `poly_to_contact`)
+
+## Error
+
+```text
+AttributeError: 'pbitcell' object has no attribute 'poly_to_active'
+```
+
+### Why did this happen?
+
+After successfully initializing OpenRAM, the SRAM generation failed during the bitcell layout generation stage.
+
+The compiler attempted to access the layout attribute `poly_to_active` while calculating the bitcell spacing. However, due to compatibility differences between the current OpenRAM compiler and the SKY130 technology package, the required DRC attribute was not initialized correctly, resulting in the above error.
 
 ---
 
-# Debugging Summary
+## Investigation
+
+### Locate all references to `poly_to_active`
+
+```bash
+grep -R "poly_to_active" ~/internship/tools/OpenRAM -n
+```
+
+**Purpose**
+
+Searches the entire OpenRAM source tree to identify where `poly_to_active` is referenced and how it is expected to be initialized.
+
+---
+
+### Locate all references to `poly_to_contact`
+
+```bash
+grep -R "poly_to_contact" ~/internship/tools/OpenRAM -n
+```
+
+**Purpose**
+
+Checks whether the compiler uses `poly_to_contact` instead of `poly_to_active` in any part of the layout generation process.
+
+---
+
+### Inspect the DRC constant initialization
+
+```bash
+grep -n "setup_drc_constants" ~/internship/tools/OpenRAM/compiler/base/hierarchy_layout.py
+```
+
+**Purpose**
+
+Locate the function responsible for generating all layout DRC constants during OpenRAM initialization.
+
+---
+
+### Inspect the constructor hierarchy
+
+```bash
+sed -n '1,150p' ~/internship/tools/OpenRAM/compiler/base/design.py
+```
+
+```bash
+sed -n '1,180p' ~/internship/tools/OpenRAM/compiler/base/hierarchy_design.py
+```
+
+```bash
+sed -n '1,200p' ~/internship/tools/OpenRAM/compiler/base/hierarchy_layout.py
+```
+
+**Purpose**
+
+Verify whether the layout constructor was executed correctly and whether DRC constants were initialized before SRAM generation.
+
+---
+
+### Generate reports for comparison
+
+```bash
+grep -R "layout\." ~/internship/tools/OpenRAM/compiler > layout_attrs.txt
+```
+
+```bash
+grep -R "self\." ~/internship/tools/OpenRAM/compiler > compiler_attrs.txt
+```
+
+```bash
+grep "drc\[" ~/internship/tools/OpenRAM/technology/sky130A/tech/tech.py > tech_drc.txt
+```
+
+**Purpose**
+
+Generate reports to compare:
+
+- SKY130 technology DRC rules
+- Layout attributes generated by OpenRAM
+- Attributes expected by the compiler
+
+This helped identify any compatibility mismatch.
+
+---
+
+### Add temporary debug statements
+
+Temporary debug statements were added inside:
+
+```text
+compiler/base/hierarchy_layout.py
+```
+
+to verify whether the required layout attributes were being generated.
+
+---
+
+## Observation
+
+The investigation showed that the SKY130 technology file defines the DRC rule:
+
+```text
+poly_to_active
+```
+
+while parts of the OpenRAM compiler expect:
+
+```text
+poly_to_contact
+```
+
+As a result, only one of the required layout attributes was being generated, causing the bitcell layout generation to fail.
+
+The temporary debug output confirmed the issue.
+
+Before the fix:
+
+```text
+Has poly_to_active   : False
+Has poly_to_contact  : True
+```
+
+---
+
+## Fix
+
+Updated:
+
+```text
+compiler/base/hierarchy_layout.py
+```
+
+Modified the compatibility logic so that both layout attributes are generated from the same SKY130 DRC rule.
+
+```python
+value = drc(match.group(0))
+
+setattr(layout, "poly_to_active", value)
+setattr(layout, "poly_to_contact", value)
+```
+
+This preserves compatibility between the latest OpenRAM compiler and the SKY130 technology package.
+
+---
+
+## Verification
+
+After applying the compatibility patch, the temporary debug statements produced:
+
+```text
+Has poly_to_active   : True
+Has poly_to_contact  : True
+Has active_space     : True
+
+poly_to_active = 0.075
+poly_to_contact = 0.075
+```
+
+The previous `AttributeError` was completely resolved.
+
+OpenRAM successfully proceeded beyond the bitcell layout generation stage.
+
+---
+
+## Proof
+
+<p align="center">
+  <img src="screenshots/issue6a.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/issue6b.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/issue6c.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/issue6d.png" width="900">
+</p>
+
+---
+
+# Issue 7: Minimum SRAM Row Restriction
+
+## Error
+
+```text
+ERROR:
+Minimum number of rows is 16, but given 2.0
+```
+
+### Why did this happen?
+
+After resolving the OpenRAM–SKY130 compatibility issue, OpenRAM successfully entered the SRAM configuration stage.
+
+However, the current OpenRAM compiler enforces an internal design constraint requiring the SRAM array to contain at least **16 rows**.
+
+Since Task 4 requires generating a **2-word × 16-bit SRAM**, the compiler terminates during SRAM configuration.
+
+---
+
+## Investigation
+
+### Inspect the SRAM configuration logic
+
+```bash
+grep -n "Minimum number of rows" ~/internship/tools/OpenRAM/compiler/sram_config.py
+```
+
+**Purpose**
+
+Locate the source code responsible for enforcing the minimum row constraint.
+
+---
+
+### Inspect the surrounding implementation
+
+```bash
+sed -n '160,190p' ~/internship/tools/OpenRAM/compiler/sram_config.py
+```
+
+**Purpose**
+
+Understand how OpenRAM calculates the SRAM organization and why configurations with fewer than 16 rows are rejected.
+
+---
+
+### Verify the SRAM configuration
+
+```bash
+cat myconfig_task4.py
+```
+
+**Purpose**
+
+Confirm that the requested SRAM configuration matches the Task 4 specification.
+
+Configuration used:
+
+```python
+word_size = 16
+num_words = 2
+num_banks = 1
+```
+
+---
+
+## Observation
+
+The following restriction was identified inside:
+
+```text
+compiler/sram_config.py
+```
+
+```python
+if (not OPTS.is_unit_test and tentative_num_rows < 16):
+```
+
+followed by
+
+```python
+debug.check(
+    tentative_num_rows * words_per_row >= 16,
+    "Minimum number of rows is 16..."
+)
+```
+
+This confirms that the limitation originates from the OpenRAM compiler itself rather than the SKY130 technology package.
+
+---
+
+## Current Status
+
+The OpenRAM–SKY130 compatibility issues have been successfully resolved.
+
+The current blocker is the minimum row restriction implemented in the OpenRAM compiler.
+
+Clarification has been requested regarding whether this restriction should be modified or whether a different OpenRAM version/configuration is intended for Task 4.
+
+---
+
+# Updated Debugging Summary
 
 | Issue | Root Cause | Resolution | Status |
 |--------|------------|------------|--------|
@@ -367,4 +666,5 @@ The OpenRAM compiler initializes successfully and generates all output files. Th
 | `design_rules` Not Defined | Old OpenRAM API | Migrated to `openram.drc` API | ✅ Fixed |
 | Missing `sklearn` | Python dependency missing | Installed Scikit-Learn | ✅ Fixed |
 | OpenRAM Initialization | Environment validation | Compiler initialized successfully | ✅ Fixed |
-
+| `poly_to_active` Compatibility | DRC naming mismatch between OpenRAM and SKY130 | Added compatibility layer in `hierarchy_layout.py` | ✅ Fixed |
+| Minimum Row Restriction | Internal OpenRAM design constraint | Awaiting clarification | ⏳ Under Investigation |
